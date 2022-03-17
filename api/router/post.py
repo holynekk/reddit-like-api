@@ -1,4 +1,3 @@
-from pyexpat import model
 from fastapi import APIRouter, Depends, status, HTTPException, Response
 from sqlalchemy.orm import Session
 from typing import List
