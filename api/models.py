@@ -1,4 +1,4 @@
-from sqlalchemy import TIMESTAMP, Column, String, Integer, Date
+from sqlalchemy import TIMESTAMP, Column, String, Integer, Date, ForeignKey
 from sqlalchemy.sql.expression import text
 from .database import Base
 
@@ -22,3 +22,9 @@ class User(Base):
     gender =  Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
 
+class Vote(Base):
+    __tablename__ = "votes"
+
+    username = Column(String, ForeignKey("users.username", ondelete="CASCADE"), primary_key=True)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True)
+    vote_type = Column(String, nullable=False)
