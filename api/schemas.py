@@ -31,7 +31,19 @@ class PostBase(BaseModel):
     caption: str
     content: str
 
-class PostOut(PostBase):
+class Post(PostBase):
+    id: int
+    created_at: datetime
+    owner_username: str
+    owner: UserOut
+
+    class Config:
+        orm_mode=True
+
+class PostOut(BaseModel):
+    Post: Post
+    upvotes: int
+    downvotes: int
     class Config:
         orm_mode = True
 

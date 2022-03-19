@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Response
 from sqlalchemy.orm import Session
+from sqlalchemy import func, case
 from typing import List
 from ..database import get_db
 from .. import models, schemas, oauth2
@@ -9,7 +10,7 @@ router = APIRouter(prefix="/posts", tags=['Posts'])
 # Get posts
 @router.get('/', response_model=List[schemas.PostOut])
 def get_posts(db: Session = Depends(get_db)):
-    all_posts = db.query(models.Post).all()
+    all_posts = db.query(models.Post, func.sum(case([(models.Vote.vote_type == "upvote", 1)], else_=0)).label("upvotes"), func.sum(case([(models.Vote.vote_type == "downvote", 1)], else_=0)).label("downvotes")).join(models.Vote, models.Post.id==models.Vote.post_id, isouter=True).group_by(models.Post.id).all()
     return all_posts
 
 @router.get('/{id}', response_model=schemas.PostOut)
@@ -22,7 +23,7 @@ def get_posts(id: int, db: Session = Depends(get_db)):
 # Create posts
 @router.post('/', status_code=status.HTTP_201_CREATED)
 def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
-    created_post = models.Post(**post.dict())
+    created_post = models.Post(**post.dict(), owner_username=current_user.username)
     db.add(created_post)
     db.commit()
     db.refresh(created_post)
