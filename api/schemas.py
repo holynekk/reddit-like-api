@@ -60,3 +60,6 @@ class TokenData(BaseModel):
 class Vote(BaseModel):
     post_id: int
     vote_type: str
+
+class Follow(BaseModel):
+    following_username: str
